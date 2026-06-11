@@ -4,3 +4,4 @@ __pycache__/
 *.log
 *.pdf
 .DS_Store
+final_report.md
