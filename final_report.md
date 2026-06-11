@@ -1,6 +1,6 @@
 # Final Project: Synthetic Survey Data Generator (TinyTroupe Responder)
 
-**GitHub Repository**: [Insert Your GitHub Repo URL]
+**GitHub Repository**: [https://github.com/LilaS-1116/TinyTroupe-Responder](https://github.com/LilaS-1116/TinyTroupe-Responder)
 
 ## 1. Target Customer
 
