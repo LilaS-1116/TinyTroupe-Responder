@@ -4,4 +4,4 @@ pydantic
 requests
 beautifulsoup4
 python-dotenv
-tinytroupe
+openai

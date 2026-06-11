@@ -7,25 +7,57 @@ try:
 except ImportError:
     TinyPerson = None
 
+import openai
+
 def answer_form_questions(questions_list, persona_desc="", iteration=0):
     if not os.environ.get("OPENAI_API_KEY"):
         raise ValueError("OPENAI_API_KEY environment variable is not set. TinyTroupe requires it to function.")
         
-    if TinyPerson is None:
-        raise ImportError("tinytroupe could not be imported.")
-
-    # Initialize a persona
-    person = TinyPerson(f"FormResponder_{iteration}")
-    
     background = persona_desc.strip() if persona_desc else "You are an average internet user, filling out a Google Form. You provide concise, realistic, and human-like answers."
     
     # Add iteration to introduce variability for bulk submissions
     if iteration > 0:
         background += f" For context, you are respondent #{iteration}. Try to vary your answers slightly from what a generic average user might say so that your answers are unique."
         
-    person.define("background", background)
-    
     results = []
+    
+    # --- FALLBACK: If tinytroupe is not available (e.g. on Vercel due to 250MB limit) ---
+    if TinyPerson is None:
+        client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        
+        # We maintain conversation history for context just like TinyTroupe does
+        messages = [
+            {"role": "system", "content": background}
+        ]
+        
+        for q in questions_list:
+            question_text = q['title']
+            prompt = f"Please answer the following form question: '{question_text}'. Just provide the final answer text without any conversational filler."
+            messages.append({"role": "user", "content": prompt})
+            
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini", # or standard gpt-4
+                    messages=messages,
+                    max_tokens=150,
+                    temperature=0.7
+                )
+                answer_text = response.choices[0].message.content.strip(' "\'')
+                messages.append({"role": "assistant", "content": answer_text})
+            except Exception as e:
+                answer_text = "No response generated."
+                
+            results.append({
+                "id": q["id"],
+                "title": question_text,
+                "answer": answer_text
+            })
+            
+        return results
+        
+    # --- ORIGINAL TINYTROUPE LOGIC ---
+    person = TinyPerson(f"FormResponder_{iteration}")
+    person.define("background", background)
     
     for q in questions_list:
         question_text = q['title']
