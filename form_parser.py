@@ -54,6 +54,17 @@ def parse_google_form(url: str):
                 item_title = item[1]
                 # item[4][0][0] is the entry ID
                 entry_id = f"entry.{item[4][0][0]}"
+                
+                # Extract options if it's a multiple choice/dropdown question
+                options = []
+                if len(item[4][0]) > 1 and isinstance(item[4][0][1], list):
+                    for opt in item[4][0][1]:
+                        if isinstance(opt, list) and len(opt) > 0 and opt[0]:
+                            options.append(opt[0])
+                
+                if options:
+                    item_title += f" (Options: {', '.join(options)})"
+                
                 questions.append({
                     "id": entry_id,
                     "title": item_title

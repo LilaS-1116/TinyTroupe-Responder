@@ -32,7 +32,7 @@ def answer_form_questions(questions_list, persona_desc="", iteration=0):
         
         for q in questions_list:
             question_text = q['title']
-            prompt = f"Please answer the following form question: '{question_text}'. Just provide the final answer text without any conversational filler."
+            prompt = f"Please answer the following form question: '{question_text}'. If options are provided, you MUST exactly match one of the options character-by-character without any trailing periods. Just provide the final answer text without any conversational filler."
             messages.append({"role": "user", "content": prompt})
             
             try:
@@ -42,7 +42,7 @@ def answer_form_questions(questions_list, persona_desc="", iteration=0):
                     max_tokens=150,
                     temperature=0.7
                 )
-                answer_text = response.choices[0].message.content.strip(' "\'')
+                answer_text = response.choices[0].message.content.strip(' "\'.')
                 messages.append({"role": "assistant", "content": answer_text})
             except Exception as e:
                 answer_text = "No response generated."
@@ -61,7 +61,7 @@ def answer_form_questions(questions_list, persona_desc="", iteration=0):
     
     for q in questions_list:
         question_text = q['title']
-        prompt = f"Please answer the following form question: '{question_text}'. Just provide the final answer text without any conversational filler."
+        prompt = f"Please answer the following form question: '{question_text}'. If options are provided, you MUST exactly match one of the options character-by-character without any trailing periods. Just provide the final answer text without any conversational filler."
         
         person.listen(prompt)
         actions = person.act(return_actions=True)
@@ -87,8 +87,8 @@ def answer_form_questions(questions_list, persona_desc="", iteration=0):
                     except Exception:
                         pass
         
-        # Cleanup potential surrounding quotes
-        answer_text = answer_text.strip(' "\'')
+        # Cleanup potential surrounding quotes and trailing periods
+        answer_text = answer_text.strip(' "\'.')
         
         results.append({
             "id": q["id"],
